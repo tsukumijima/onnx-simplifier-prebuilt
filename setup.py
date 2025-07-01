@@ -7,7 +7,7 @@ import setuptools.command.build_ext
 
 from collections import namedtuple
 from contextlib import contextmanager
-import glob
+from pathlib import Path
 import os
 import shlex
 import subprocess
@@ -272,7 +272,6 @@ install_requires.extend([
 setup_requires.append('pytest-runner')
 
 # read the contents of your README file
-from pathlib import Path
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 

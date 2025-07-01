@@ -1,4 +1,3 @@
-import io
 from typing import Any, Callable, Dict, Optional
 import os
 import tempfile
@@ -269,7 +268,7 @@ def test_model_larger_than_2gb():
 
 def test_unset_optional_input():
     fmap = []
-    nodes = [] 
+    nodes = []
     initializers = []
 
     fmap.append(onnx.helper.make_tensor_value_info('y', onnx.TensorProto.FLOAT, shape=(1,3,4,4)))
@@ -295,7 +294,7 @@ def test_unset_optional_input():
       )
 
     opset_imports = [onnx.helper.make_opsetid("", 14)]
-    
+
     model = onnx.helper.make_model(graph_def, opset_imports=opset_imports, ir_version=10)
     sim_model, check_ok = onnxsim.simplify(model, check_n=3)
     assert check_ok
