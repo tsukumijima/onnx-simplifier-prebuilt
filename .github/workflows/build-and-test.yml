@@ -8,6 +8,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  # This is used to skip tests that are too heavy for CI
+  ONNXSIM_CI: 1
+
 jobs:
   build_wheels:
     env:
@@ -17,6 +21,7 @@ jobs:
       CIBW_ARCHS_MACOS: universal2
       CIBW_ARCHS_LINUX: x86_64 aarch64
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+      CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
       CIBW_BEFORE_ALL_LINUX: WD=`pwd` && /opt/python/cp38-cp38/bin/python -m pip install --target tmp_cmake cmake && cp tmp_cmake/bin/cmake /usr/local/bin/cmake && rm -rf tmp_cmake && /opt/python/cp38-cp38/bin/python -m pip install cmake && cmake --version && whereis cmake
       CIBW_BEFORE_ALL_MACOS: WD=`pwd` && pip install cmake
       CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
@@ -31,7 +36,8 @@ jobs:
       CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py
       # Skip 32-bit or musl or pypy builds
       CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
-      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+      # Only build on Python 3.10 and above
+      CIBW_PROJECT_REQUIRES_PYTHON: ">=3.10"
     name: Build wheel ${{ matrix.name }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
