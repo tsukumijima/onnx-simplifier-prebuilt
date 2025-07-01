@@ -143,7 +143,8 @@ jobs:
           build-wasm-node-OFF/onnxsim.wasm
 
     - name: Upload to convertmodel.com
-      if: ${{ github.ref == 'refs/heads/master' }}
+      # if: ${{ github.ref == 'refs/heads/master' }}
+      if: false
       run: |
         wget https://gosspublic.alicdn.com/ossutil/1.7.14/ossutil64
         chmod 755 ossutil64
