@@ -15,11 +15,6 @@ env:
 jobs:
   build_wheels:
     env:
-      CIBW_ARCHS_WINDOWS: AMD64
-      # Only build universal2 package
-      # Related issue: https://github.com/pypa/cibuildwheel/issues/1190
-      CIBW_ARCHS_MACOS: universal2
-      CIBW_ARCHS_LINUX: x86_64 aarch64
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
       CIBW_BEFORE_ALL_LINUX: WD=`pwd` && /opt/python/cp38-cp38/bin/python -m pip install --target tmp_cmake cmake && cp tmp_cmake/bin/cmake /usr/local/bin/cmake && rm -rf tmp_cmake && /opt/python/cp38-cp38/bin/python -m pip install cmake && cmake --version && whereis cmake
@@ -31,8 +26,6 @@ jobs:
       CIBW_BEFORE_TEST_LINUX: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
       CIBW_BEFORE_TEST_MACOS: pip install torch torchvision
       CIBW_BEFORE_TEST_WINDOWS: pip install torch torchvision
-      # Skip arm test on x86.
-      CIBW_TEST_SKIP: "*_arm64 *_universal2:arm64"
       CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py
       # Skip 32-bit or musl or pypy builds
       CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
@@ -42,9 +35,35 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, windows-2025, macos-15]
-        # name: [onnxsim, onnx-simplifier]
-        name: [onnxsim]
+        include:
+          - os: windows-2025
+            archs: AMD64
+            name: onnxsim
+          - os: macos-15
+            # Only build universal2 package
+            # Related issue: https://github.com/pypa/cibuildwheel/issues/1190
+            archs: universal2
+            name: onnxsim
+          - os: ubuntu-24.04
+            archs: x86_64
+            name: onnxsim
+          - os: ubuntu-24.04-arm
+            archs: aarch64
+            name: onnxsim
+          # - os: windows-2025
+          #   archs: AMD64
+          #   name: onnx-simplifier
+          # - os: macos-15
+          #   # Only build universal2 package
+          #   # Related issue: https://github.com/pypa/cibuildwheel/issues/1190
+          #   archs: universal2
+          #   name: onnx-simplifier
+          # - os: ubuntu-24.04
+          #   archs: x86_64
+          #   name: onnx-simplifier
+          # - os: ubuntu-24.04-arm
+          #   archs: aarch64
+          #   name: onnx-simplifier
     steps:
     - uses: actions/checkout@v4
       with:
@@ -53,11 +72,14 @@ jobs:
     - name: Build onnxsim wheels
       uses: pypa/cibuildwheel@v2.23.3
       env:
+        CIBW_ARCHS_WINDOWS: ${{ contains(matrix.os, 'windows') && matrix.archs || 'AMD64' }}
+        CIBW_ARCHS_MACOS: ${{ contains(matrix.os, 'macos') && matrix.archs || 'x86_64' }}
+        CIBW_ARCHS_LINUX: ${{ contains(matrix.os, 'ubuntu') && matrix.archs || 'x86_64' }}
         CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" ONNXSIM_PKG_NAME=${{ matrix.name }}
         CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON" ONNXSIM_PKG_NAME=${{ matrix.name }}
     - uses: actions/upload-artifact@v4
       with:
-        name: python-dist-${{ matrix.os }}-${{ matrix.name }}
+        name: python-dist-${{ matrix.os }}-${{ matrix.archs }}-${{ matrix.name }}
         path: ./wheelhouse/*.whl
 
   build_sdist:
