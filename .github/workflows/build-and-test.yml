@@ -47,9 +47,9 @@ jobs:
           - os: ubuntu-24.04
             archs: x86_64
             name: onnxsim
-          - os: ubuntu-24.04-arm
-            archs: aarch64
-            name: onnxsim
+          # - os: ubuntu-24.04-arm
+          #   archs: aarch64
+          #   name: onnxsim
           # - os: windows-2025
           #   archs: AMD64
           #   name: onnx-simplifier
