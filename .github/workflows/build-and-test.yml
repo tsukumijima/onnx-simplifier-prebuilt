@@ -26,6 +26,8 @@ jobs:
       CIBW_BEFORE_TEST_LINUX: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
       CIBW_BEFORE_TEST_MACOS: pip install torch torchvision
       CIBW_BEFORE_TEST_WINDOWS: pip install torch torchvision
+      # Skip universal2 x86_64 tests (as PyTorch no longer supports them)
+      CIBW_TEST_SKIP: "*_universal2:x86_64"
       CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py
       # Skip 32-bit or musl or pypy builds
       CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
