@@ -1,3 +1,40 @@
+# ONNX Simplifier Prebuilt
+
+[![PyPI version](https://img.shields.io/pypi/v/onnxsim-prebuilt.svg)](https://pypi.python.org/pypi/onnxsim-prebuilt/)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/onnxsim-prebuilt.svg)](https://pypi.python.org/pypi/onnxsim-prebuilt/)
+[![PyPI license](https://img.shields.io/pypi/l/onnxsim-prebuilt.svg)](https://pypi.python.org/pypi/onnxsim-prebuilt/)
+[![Build and Test](https://github.com/tsukumijima/onnx-simplifier-prebuilt/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/tsukumijima/onnx-simplifier-prebuilt/actions/workflows/build-and-test.yml)
+
+onnxsim-prebuilt is a fork of [onnxsim](https://github.com/daquexian/onnx-simplifier) that aims to publish prebuilt wheels for Python 3.12 and later to PyPI.
+
+## Changes in this fork
+
+- **Changed package name to `onnxsim-prebuilt`**
+  - The library name remains unchanged from `onnxsim`, so you can import it as `import onnxsim` just like the original [onnxsim](https://github.com/daquexian/onnx-simplifier)
+  - Can be used as a drop-in replacement for the original [onnxsim](https://github.com/daquexian/onnx-simplifier)
+- **Publish prebuilt wheels for all platforms (Windows, macOS x64/arm64, Linux x64/arm64) on PyPI**
+  - onnx-simplifier depends on C++, CMake, and submodules, making the build environment setup relatively difficult and time-consuming
+    - For over a year, onnxsim has not been updated, and prebuilt wheels for Python 3.12/3.13 are not available (ref: [onnxsim/issues/334](https://github.com/daquexian/onnx-simplifier/issues/334), [onnxsim/pull/359](https://github.com/daquexian/onnx-simplifier/pull/359))
+    - Various issues arise, such as the need to install build-essentials and CMake in Docker images just for installation, and long build times
+  - By publishing prebuilt wheels on PyPI, we aim to enable easy installation even on PCs without a build environment
+  - Incorporated the CI improvements proposed in the pull request [onnxsim/pull/359](https://github.com/daquexian/onnx-simplifier/pull/359), and further enhanced it to build and publish prebuilt wheels for Linux aarch64
+- **Explicitly added Python 3.12 / 3.13 to supported versions**
+  - Changed CI target Python versions to Python 3.10 and above
+  - This fork does not support Python 3.9 and below
+
+## Installation
+
+You can install the library by running the following command:
+
+```bash
+pip install onnxsim-prebuilt
+```
+
+The documentation below is inherited from the original [onnxsim](https://github.com/daquexian/onnx-simplifier) without any modifications.  
+There is no guarantee that the content of this documentation applies to onnxsim-prebuilt.
+
+-------
+
 # ONNX Simplifier
 
 [![PyPI version](https://img.shields.io/pypi/v/onnx-simplifier.svg)](https://pypi.python.org/pypi/onnx-simplifier/)

@@ -42,32 +42,18 @@ jobs:
         include:
           - os: windows-2025
             archs: AMD64
-            name: onnxsim
+            name: onnxsim-prebuilt
           - os: macos-15
             # Only build universal2 package
             # Related issue: https://github.com/pypa/cibuildwheel/issues/1190
             archs: universal2
-            name: onnxsim
+            name: onnxsim-prebuilt
           - os: ubuntu-24.04
             archs: x86_64
-            name: onnxsim
+            name: onnxsim-prebuilt
           - os: ubuntu-24.04-arm
             archs: aarch64
-            name: onnxsim
-          # - os: windows-2025
-          #   archs: AMD64
-          #   name: onnx-simplifier
-          # - os: macos-15
-          #   # Only build universal2 package
-          #   # Related issue: https://github.com/pypa/cibuildwheel/issues/1190
-          #   archs: universal2
-          #   name: onnx-simplifier
-          # - os: ubuntu-24.04
-          #   archs: x86_64
-          #   name: onnx-simplifier
-          # - os: ubuntu-24.04-arm
-          #   archs: aarch64
-          #   name: onnx-simplifier
+            name: onnxsim-prebuilt
     steps:
     - uses: actions/checkout@v4
       with:
@@ -103,22 +89,17 @@ jobs:
     - name: Build sdist
       run: |
         export ONNXSIM_SDIST=ON
-        export ONNXSIM_PKG_NAME=onnxsim
+        export ONNXSIM_PKG_NAME=onnxsim-prebuilt
         pipx run build --sdist
-        # export ONNXSIM_PKG_NAME=onnx-simplifier
-        # pipx run build --sdist
 
     - name: Install and test sdist
       run: |
         # It's important to leave the project directory where a 'onnxsim' subdirectory exists
         cd dist
         python3 -m pip install onnxruntime
-        python3 -m pip install onnxsim-*.tar.gz
+        python3 -m pip install onnxsim_prebuilt-*.tar.gz
         python3 -c "import onnxsim; print(dir(onnxsim))"
-        python3 -m pip uninstall -y onnxsim
-        # python3 -m pip install onnx_simplifier-*.tar.gz
-        # python3 -c "import onnxsim; print(dir(onnxsim))"
-        # python3 -m pip uninstall -y onnx-simplifier
+        python3 -m pip uninstall -y onnxsim-prebuilt
 
     - uses: actions/upload-artifact@v4
       with:
