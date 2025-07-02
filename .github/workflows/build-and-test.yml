@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - master
+    tags:
+      - v*
   pull_request:
   workflow_dispatch:
 
@@ -20,7 +22,6 @@ jobs:
       CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
       CIBW_BEFORE_ALL_LINUX: WD=`pwd` && /opt/python/cp38-cp38/bin/python -m pip install --target tmp_cmake cmake && cp tmp_cmake/bin/cmake /usr/local/bin/cmake && rm -rf tmp_cmake && /opt/python/cp38-cp38/bin/python -m pip install cmake && cmake --version && whereis cmake
       CIBW_BEFORE_ALL_MACOS: WD=`pwd` && pip install cmake
-      CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
       CIBW_TEST_REQUIRES_LINUX: pytest flake8 onnxruntime
       CIBW_TEST_REQUIRES_MACOS: pytest onnxruntime
       CIBW_TEST_REQUIRES_WINDOWS: pytest onnxruntime
@@ -67,6 +68,7 @@ jobs:
         CIBW_ARCHS_LINUX: ${{ contains(matrix.os, 'ubuntu') && matrix.archs || 'x86_64' }}
         CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" ONNXSIM_PKG_NAME=${{ matrix.name }}
         CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON" ONNXSIM_PKG_NAME=${{ matrix.name }}
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15 ONNXSIM_PKG_NAME=${{ matrix.name }}
     - uses: actions/upload-artifact@v4
       with:
         name: python-dist-${{ matrix.os }}-${{ matrix.archs }}-${{ matrix.name }}
