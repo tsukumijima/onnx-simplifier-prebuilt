@@ -16,6 +16,7 @@ jobs:
   build_wheels:
     env:
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+      CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
       CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
       CIBW_BEFORE_ALL_LINUX: WD=`pwd` && /opt/python/cp38-cp38/bin/python -m pip install --target tmp_cmake cmake && cp tmp_cmake/bin/cmake /usr/local/bin/cmake && rm -rf tmp_cmake && /opt/python/cp38-cp38/bin/python -m pip install cmake && cmake --version && whereis cmake
       CIBW_BEFORE_ALL_MACOS: WD=`pwd` && pip install cmake
@@ -36,6 +37,7 @@ jobs:
     name: Build wheel ${{ matrix.name }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-2025
@@ -49,9 +51,9 @@ jobs:
           - os: ubuntu-24.04
             archs: x86_64
             name: onnxsim
-          # - os: ubuntu-24.04-arm
-          #   archs: aarch64
-          #   name: onnxsim
+          - os: ubuntu-24.04-arm
+            archs: aarch64
+            name: onnxsim
           # - os: windows-2025
           #   archs: AMD64
           #   name: onnx-simplifier
