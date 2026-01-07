@@ -8,7 +8,7 @@
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/vector.h>
 
-#include "onnx/py_utils.h"
+#include "onnx/proto_utils.h"
 #include "onnxsim.h"
 
 namespace py = nanobind;
