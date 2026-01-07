@@ -16,6 +16,7 @@ jobs:
       # Only build universal2 package
       # Related issue: https://github.com/pypa/cibuildwheel/issues/1190
       CIBW_ARCHS_MACOS: universal2
+      CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
       CIBW_BEFORE_ALL_LINUX: WD=`pwd` pip install cmake ninja && cmake --version && whereis cmake && ninja --version
