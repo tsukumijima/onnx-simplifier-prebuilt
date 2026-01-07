@@ -70,7 +70,7 @@ if (EMSCRIPTEN)
 endif()
 
 if (ONNXSIM_PYTHON)
-  find_package(Python 3.10 COMPONENTS Interpreter Development REQUIRED)
+  find_package(Python 3.10 COMPONENTS Interpreter Development.Module REQUIRED)
   add_subdirectory(third_party/onnx-optimizer/third_party/nanobind)
   nanobind_add_module(onnxsim_cpp2py_export onnxsim/cpp2py_export.cc)
   target_link_libraries(onnxsim_cpp2py_export PRIVATE onnxsim)
