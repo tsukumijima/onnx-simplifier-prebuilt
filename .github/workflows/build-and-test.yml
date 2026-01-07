@@ -44,7 +44,7 @@ jobs:
       env:
         CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }} CMAKE_GENERATOR=Ninja PIP_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cpu
         CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }} PIP_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cpu
-        CIBW_BUILD: "${{ matrix.py_ver }}"
+        CIBW_BUILD: "${{ matrix.py_ver }}-*"
     - uses: actions/upload-artifact@v4
       with:
         name: python-dist-${{ matrix.os }}-${{ matrix.name }}-${{ matrix.py_ver }}
