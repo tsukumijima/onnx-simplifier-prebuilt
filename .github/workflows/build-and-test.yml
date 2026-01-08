@@ -32,6 +32,10 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+      if: ${{ matrix.os == 'windows-2025' }}
     - name: Build onnxsim wheels
       uses: pypa/cibuildwheel@v3.3.1
       env:
