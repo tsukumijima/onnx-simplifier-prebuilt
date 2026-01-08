@@ -16,7 +16,7 @@ jobs:
       CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
-      CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools"
+      CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools sccache"
       CIBW_TEST_REQUIRES: pytest flake8 onnxruntime onnxscript==0.2.3
       CIBW_BEFORE_TEST: pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu/
       CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py
@@ -34,20 +34,16 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
-    - run: sudo apt update && sudo apt install ccache
-      if: ${{ matrix.os == 'ubuntu-24.04' }}
-    - run: brew install ccache
-      if: ${{ matrix.os == 'macos-15' }}
     - name: Build onnxsim wheels
       uses: pypa/cibuildwheel@v3.3.1
       env:
-        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnxsim CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=ccache
+        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnxsim CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache
         CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnxsim CMAKE_BUILD_PARALLEL_LEVEL=4
         CIBW_BUILD: "${{ matrix.py_ver }}-*"
     - name: Build onnx-simplifier wheels
       uses: pypa/cibuildwheel@v3.3.1
       env:
-        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnx-simplifier CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=ccache
+        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnx-simplifier CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache
         CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=$onnx-simplifier CMAKE_BUILD_PARALLEL_LEVEL=4
         CIBW_BUILD: "${{ matrix.py_ver }}-*"
     - name: Check ABI3
