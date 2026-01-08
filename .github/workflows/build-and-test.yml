@@ -13,7 +13,7 @@ env:
 jobs:
   build_wheels:
     env:
-      CIBW_BUILD_FRONTEND: "pip; args: -v --no-build-isolation"
+      CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
       CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools"
@@ -39,7 +39,7 @@ jobs:
       uses: pypa/cibuildwheel@v3.3.1
       env:
         CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }} CMAKE_GENERATOR=Ninja
-        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }}
+        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }} CMAKE_BUILD_PARALLEL_LEVEL=4
         CIBW_BUILD: "${{ matrix.py_ver }}-*"
     - name: Check ABI3
       run: |
