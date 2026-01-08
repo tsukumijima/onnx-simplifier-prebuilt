@@ -23,23 +23,32 @@ jobs:
       # Only build on Python 3 and skip 32-bit or musl builds
       CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_*"
       MACOSX_DEPLOYMENT_TARGET: "10.15"
-    name: Build wheel ${{ matrix.name }}-${{ matrix.py_ver }} on ${{ matrix.os }}
+    name: Build wheel ${{ matrix.py_ver }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-24.04, windows-2025, macos-15]
-        name: [onnxsim, onnx-simplifier]
         py_ver: [cp310, cp312, cp313]
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
+    - run: sudo apt update && sudo apt install ccache
+      if: ${{ matrix.os == "ubuntu-24.04" }}
+    - run: brew install ccache
+      if: ${{ matrix.os == "macos-15" }}
     - name: Build onnxsim wheels
       uses: pypa/cibuildwheel@v3.3.1
       env:
-        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }} CMAKE_GENERATOR=Ninja
-        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }} CMAKE_BUILD_PARALLEL_LEVEL=4
+        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnxsim CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=ccache
+        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnxsim CMAKE_BUILD_PARALLEL_LEVEL=4
+        CIBW_BUILD: "${{ matrix.py_ver }}-*"
+    - name: Build onnx-simplifier wheels
+      uses: pypa/cibuildwheel@v3.3.1
+      env:
+        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnx-simplifier CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=ccache
+        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=$onnx-simplifier CMAKE_BUILD_PARALLEL_LEVEL=4
         CIBW_BUILD: "${{ matrix.py_ver }}-*"
     - name: Check ABI3
       run: |
@@ -48,7 +57,7 @@ jobs:
       if: ${{ contains(fromJSON('["cp312", "cp313"]'), matrix.py_ver) }}
     - uses: actions/upload-artifact@v4
       with:
-        name: python-dist-${{ matrix.os }}-${{ matrix.name }}-${{ matrix.py_ver }}
+        name: python-dist-${{ matrix.os }}-${{ matrix.py_ver }}
         path: ./wheelhouse/*.whl
       if: ${{ !contains(fromJSON('["cp313"]'), matrix.py_ver) }}
 
