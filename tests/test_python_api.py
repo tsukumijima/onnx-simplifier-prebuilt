@@ -43,7 +43,7 @@ def str_is_logical_positive(x: str) -> bool:
 
 def skip_in_ci():
     return pytest.mark.skipif(
-        str_is_logical_positive(os.getenv("ONNXSIM_CI", "")), reason="memory limited"
+        str_is_logical_positive(os.getenv("CI", "")), reason="memory limited"
     )
 
 
