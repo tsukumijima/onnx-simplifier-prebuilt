@@ -51,6 +51,8 @@ jobs:
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
+    env:
+      CMAKE_GENERATOR: Ninja
     steps:
     - uses: actions/checkout@v4
       with:
@@ -74,7 +76,7 @@ jobs:
       run: |
         # It's important to leave the project directory where a 'onnxsim' subdirectory exists
         cd dist
-        python3 -m pip install onnxruntime
+        python3 -m pip install onnxruntime ninja
         python3 -m pip install onnxsim-*.tar.gz
         python3 -c "import onnxsim; print(dir(onnxsim))"
         python3 -m pip uninstall -y onnxsim
