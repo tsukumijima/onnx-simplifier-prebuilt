@@ -38,14 +38,8 @@ jobs:
     - name: Build onnxsim wheels
       uses: pypa/cibuildwheel@v3.3.1
       env:
-        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnxsim CMAKE_GENERATOR=Ninja
-        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnxsim CMAKE_BUILD_PARALLEL_LEVEL=4
-        CIBW_BUILD: "${{ matrix.py_ver }}-*"
-    - name: Build onnx-simplifier wheels
-      uses: pypa/cibuildwheel@v3.3.1
-      env:
-        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnx-simplifier CMAKE_GENERATOR=Ninja
-        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=onnx-simplifier CMAKE_BUILD_PARALLEL_LEVEL=4
+        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF"  CMAKE_GENERATOR=Ninja
+        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" CMAKE_BUILD_PARALLEL_LEVEL=4
         CIBW_BUILD: "${{ matrix.py_ver }}-*"
     - name: Check ABI3
       run: |
@@ -75,9 +69,9 @@ jobs:
     - name: Build sdist
       run: |
         export ONNXSIM_SDIST=ON
-        export ONNXSIM_PKG_NAME=onnxsim
+        pushd scripts/onnx-simplifier
         pipx run build --sdist
-        export ONNXSIM_PKG_NAME=onnx-simplifier
+        popd
         pipx run build --sdist
 
     - name: Install and test sdist
@@ -88,7 +82,7 @@ jobs:
         python3 -m pip install onnxsim-*.tar.gz
         python3 -c "import onnxsim; print(dir(onnxsim))"
         python3 -m pip uninstall -y onnxsim
-        python3 -m pip install onnx_simplifier-*.tar.gz
+        python3 -m pip install onnx_simplifier-*.tar.gz onnxsim-*.tar.gz
         python3 -c "import onnxsim; print(dir(onnxsim))"
         python3 -m pip uninstall -y onnx-simplifier
 
