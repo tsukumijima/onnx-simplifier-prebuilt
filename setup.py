@@ -322,4 +322,5 @@ setuptools.setup(
             'onnxsim=onnxsim:main',
         ],
     },
+    options=setup_opts,
 )

@@ -41,15 +41,16 @@ jobs:
         CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }} CMAKE_GENERATOR=Ninja
         CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" ONNXSIM_PKG_NAME=${{ matrix.name }}
         CIBW_BUILD: "${{ matrix.py_ver }}-*"
-    - uses: actions/upload-artifact@v4
-      with:
-        name: python-dist-${{ matrix.os }}-${{ matrix.name }}-${{ matrix.py_ver }}
-        path: ./wheelhouse/*.whl
     - name: Check ABI3
       run: |
         pip install abi3audit
         abi3audit --strict -v --report ./wheelhouse/*.whl
       if: ${{ contains(fromJSON('["cp312", "cp313"]'), matrix.py_ver) }}
+    - uses: actions/upload-artifact@v4
+      with:
+        name: python-dist-${{ matrix.os }}-${{ matrix.name }}-${{ matrix.py_ver }}
+        path: ./wheelhouse/*.whl
+      if: ${{ !contains(fromJSON('["cp313"]'), matrix.py_ver) }}
 
   build_sdist:
     name: Build source distribution
