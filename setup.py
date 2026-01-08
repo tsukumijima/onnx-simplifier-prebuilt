@@ -20,7 +20,8 @@ import re
 
 TOP_DIR = os.path.realpath(os.path.dirname(__file__))
 SRC_DIR = os.path.join(TOP_DIR, 'onnxsim')
-CMAKE_BUILD_DIR = os.path.join(TOP_DIR, '.setuptools-cmake-build')
+pkg_name = os.getenv("ONNXSIM_PKG_NAME", "onnxsim")
+CMAKE_BUILD_DIR = os.path.join(TOP_DIR, '.setuptools-cmake-build-' + pkg_name)
 
 WINDOWS = (os.name == 'nt')
 MACOS = sys.platform.startswith("darwin")
@@ -287,7 +288,7 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
-    name=os.getenv("ONNXSIM_PKG_NAME", "onnxsim"),
+    name=pkg_name,
     version=VersionInfo.version,
     description='Simplify your ONNX model',
     ext_modules=ext_modules,
