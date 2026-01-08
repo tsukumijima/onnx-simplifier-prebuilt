@@ -69,6 +69,7 @@ jobs:
         export ONNXSIM_SDIST=ON
         pushd scripts/onnx-simplifier
         pipx run build --sdist
+        mv dist ../..
         popd
         pipx run build --sdist
 
