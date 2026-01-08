@@ -189,11 +189,6 @@ class cmake_build(setuptools.Command):
             subprocess.check_call(cmake_args)
 
             build_args = [CMAKE, '--build', os.curdir, '--target onnxsim_cpp2py_export']
-            if WINDOWS:
-                build_args.extend(['--config', build_type])
-                build_args.extend(['--', '/maxcpucount:{}'.format(self.jobs)])
-            else:
-                build_args.extend(['--', '-j', str(self.jobs)])
             print(f"Run command {build_args}")
             subprocess.check_call(build_args)
 
