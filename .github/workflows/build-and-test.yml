@@ -49,6 +49,11 @@ jobs:
       with:
         name: python-dist-${{ matrix.os }}-${{ matrix.name }}-${{ matrix.py_ver }}
         path: ./wheelhouse/*.whl
+    - name: Check ABI3
+      run: |
+        pip install abi3audit
+        abi3audit --strict -v --report ./wheelhouse/*.whl
+      if: ${{ contains(fromJSON('["cp312", "cp313"]'), matrix.py_ver) }}
 
   build_sdist:
     name: Build source distribution

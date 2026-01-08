@@ -248,10 +248,21 @@ cmdclass = {
     'develop': develop,
 }
 
+py_limited_api = sys.version_info[0] >= 3 and sys.version_info[1] >= 12
+if py_limited_api:
+    setup_opts = {
+        'bdist_wheel': {
+            'py_limited_api': 'cp312'
+        },
+    }
+else:
+    setup_opts = {}
+
 ext_modules = [
     setuptools.Extension(
         name=str('onnxsim.onnxsim_cpp2py_export'),
-        sources=[])
+        sources=[],
+        py_limited_api=py_limited_api)
 ]
 
 # no need to do fancy stuff so far
