@@ -16,7 +16,7 @@ jobs:
       CIBW_ENVIRONMENT_PASS_LINUX: CI
       CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools"
       CIBW_BEFORE_BUILD_WINDOWS: |
-        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" && python3 -m pip install --break-system-packages cmake ninja setuptools"
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64 && python3 -m pip install --break-system-packages cmake ninja setuptools"
       CIBW_TEST_REQUIRES: pytest flake8 onnxruntime onnxscript==0.2.3
       CIBW_BEFORE_TEST: pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu/
       CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py
