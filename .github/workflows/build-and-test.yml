@@ -13,14 +13,15 @@ jobs:
       CIBW_ARCHS: native
       CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-      CIBW_ENVIRONMENT_PASS_LINUX: CI
-      CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools"
+      CIBW_ENVIRONMENT_PASS_LINUX: CI SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN 
+      CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools sccache"
       CIBW_TEST_REQUIRES: pytest flake8 onnxruntime onnxscript==0.2.3
       CIBW_BEFORE_TEST: pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu/
       CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py
       # Only build on Python 3 and skip 32-bit or musl builds
       CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_*"
-      CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" CMAKE_GENERATOR=Ninja
+      CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF" CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache
+      SCCACHE_GHA_ENABLED: on
     name: Build wheel ${{ matrix.py_ver }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
