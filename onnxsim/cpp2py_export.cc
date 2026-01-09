@@ -6,6 +6,7 @@
 #include <nanobind/trampoline.h>
 #include <nanobind/stl/optional.h>
 #include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
 #include "onnx/proto_utils.h"
@@ -64,6 +65,8 @@ struct PyModelExecutorTrampoline : public PyModelExecutor {
 NB_MODULE(onnxsim_cpp2py_export, m) {
   m.doc() = "ONNX Simplifier";
 
+  using namespace py::literals;
+
   m.def("simplify",
         [](const py::bytes& model_proto_bytes,
            std::optional<std::vector<std::string>> skip_optimizers,
@@ -78,7 +81,8 @@ NB_MODULE(onnxsim_cpp2py_export, m) {
           std::string out;
           result.SerializeToString(&out);
           return py::bytes(out.data(), out.size());
-        })
+        }, "model_bytes"_a, "skip_optimizers"_a.none(),
+        "constant_folding"_a = true, "shape_inference"_a = true, "tensor_size_threshold"_a)
       .def("simplify_path",
            [](const std::string& in_path, const std::string& out_path,
               std::optional<std::vector<std::string>> skip_optimizers,
@@ -89,7 +93,10 @@ NB_MODULE(onnxsim_cpp2py_export, m) {
              SimplifyPath(in_path, out_path, skip_optimizers, constant_folding,
                           shape_inference, tensor_size_threshold);
              return true;
-           })
+           }, "in_path"_a, "out_path"_a,
+           "skip_optimizers"_a.none(),
+           "constant_folding"_a = true, "shape_inference"_a = true,
+           "tensor_size_threshold"_a)
       .def("_set_model_executor",
            [](std::shared_ptr<PyModelExecutor> executor) {
              ModelExecutor::set_instance(std::move(executor));
