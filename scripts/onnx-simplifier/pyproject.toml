@@ -1,0 +1,4 @@
+[project]
+name = "onnx-simplifier"
+dependencies = ["onnxsim"]
+version = "0.5.0"

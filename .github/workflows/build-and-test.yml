@@ -17,24 +17,22 @@ env:
 jobs:
   build_wheels:
     env:
+      CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
-      CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI
-      CIBW_BEFORE_ALL_LINUX: WD=`pwd` && /opt/python/cp38-cp38/bin/python -m pip install --target tmp_cmake cmake && cp tmp_cmake/bin/cmake /usr/local/bin/cmake && rm -rf tmp_cmake && /opt/python/cp38-cp38/bin/python -m pip install cmake && cmake --version && whereis cmake
-      CIBW_BEFORE_ALL_MACOS: WD=`pwd` && pip install cmake
-      CIBW_TEST_REQUIRES_LINUX: pytest flake8 onnxruntime onnxscript
-      CIBW_TEST_REQUIRES_MACOS: pytest onnxruntime onnxscript
-      CIBW_TEST_REQUIRES_WINDOWS: pytest onnxruntime onnxscript
-      CIBW_BEFORE_TEST_LINUX: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-      CIBW_BEFORE_TEST_MACOS: pip install torch torchvision
-      CIBW_BEFORE_TEST_WINDOWS: pip install torch torchvision
+      CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2
+      CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools sccache"
+      CIBW_TEST_REQUIRES: pytest flake8 onnxruntime onnxscript==0.2.3
+      CIBW_BEFORE_TEST: pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cpu/
       # Skip universal2 x86_64 tests (as PyTorch no longer supports them)
       CIBW_TEST_SKIP: "*_universal2:x86_64"
-      CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py
+      CIBW_TEST_COMMAND: pytest -v {project}/tests/test_python_api.py && onnxsim -h
       # Skip 32-bit or musl or pypy builds
       CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_* pp*"
       # Only build on Python 3.10 and above
       CIBW_PROJECT_REQUIRES_PYTHON: ">=3.10"
+      SCCACHE_GHA_ENABLED: on
+      ACTIONS_CACHE_SERVICE_V2: on
     name: Build wheel ${{ matrix.name }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -60,15 +58,20 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
+    - uses: mozilla-actions/sccache-action@v0.0.9
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+      if: ${{ matrix.os == 'windows-2025' }}
     - name: Build onnxsim wheels
-      uses: pypa/cibuildwheel@v2.23.3
+      uses: pypa/cibuildwheel@v3.3.1
       env:
         CIBW_ARCHS_WINDOWS: ${{ contains(matrix.os, 'windows') && matrix.archs || 'AMD64' }}
         CIBW_ARCHS_MACOS: ${{ contains(matrix.os, 'macos') && matrix.archs || 'x86_64' }}
         CIBW_ARCHS_LINUX: ${{ contains(matrix.os, 'ubuntu') && matrix.archs || 'x86_64' }}
-        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" ONNXSIM_PKG_NAME=${{ matrix.name }}
-        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" ONNXSIM_PKG_NAME=${{ matrix.name }}
-        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" ONNXSIM_PKG_NAME=${{ matrix.name }}
+        CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache ONNXSIM_PKG_NAME=${{ matrix.name }}
+        CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache ONNXSIM_PKG_NAME=${{ matrix.name }}
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache ONNXSIM_PKG_NAME=${{ matrix.name }}
     - uses: actions/upload-artifact@v4
       with:
         name: python-dist-${{ matrix.os }}-${{ matrix.archs }}-${{ matrix.name }}
@@ -77,11 +80,15 @@ jobs:
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
+    env:
+      CMAKE_GENERATOR: Ninja
+      CMAKE_CXX_COMPILER_LAUNCHER: sccache
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
+    - uses: mozilla-actions/sccache-action@v0.0.9
 
     - name: Update version
       if: startsWith(github.ref, 'refs/tags/v')
@@ -98,7 +105,7 @@ jobs:
       run: |
         # It's important to leave the project directory where a 'onnxsim' subdirectory exists
         cd dist
-        python3 -m pip install onnxruntime
+        python3 -m pip install onnxruntime ninja sccache
         python3 -m pip install onnxsim_prebuilt-*.tar.gz
         python3 -c "import onnxsim; print(dir(onnxsim))"
         python3 -m pip uninstall -y onnxsim-prebuilt

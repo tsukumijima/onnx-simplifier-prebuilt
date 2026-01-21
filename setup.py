@@ -139,7 +139,6 @@ class cmake_build(setuptools.Command):
                 '-DPython_INCLUDE_DIR={}'.format(sysconfig.get_python_inc()),
                 '-DPython_EXECUTABLE={}'.format(sys.executable),
                 # For pybind11
-                '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
                 '-DBUILD_ONNX_PYTHON=OFF',
                 '-DONNXSIM_PYTHON=ON',
                 '-DONNXSIM_BUILTIN_ORT=OFF',
@@ -168,10 +167,6 @@ class cmake_build(setuptools.Command):
                 ])
                 if USE_MSVC_STATIC_RUNTIME:
                     cmake_args.append('-DONNX_USE_MSVC_STATIC_RUNTIME=ON')
-                if platform.architecture()[0] == '64bit':
-                    cmake_args.extend(['-A', 'x64', '-T', 'host=x64'])
-                else:
-                    cmake_args.extend(['-A', 'Win32', '-T', 'host=x86'])
             if MACOS:
                 # Cross-compile support for macOS - respect ARCHFLAGS if set
                 archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
@@ -194,11 +189,6 @@ class cmake_build(setuptools.Command):
             subprocess.check_call(cmake_args)
 
             build_args = [CMAKE, '--build', os.curdir, '--target onnxsim_cpp2py_export']
-            if WINDOWS:
-                build_args.extend(['--config', build_type])
-                build_args.extend(['--', '/maxcpucount:{}'.format(self.jobs)])
-            else:
-                build_args.extend(['--', '-j', str(self.jobs)])
             print(f"Run command {build_args}")
             subprocess.check_call(build_args)
 
@@ -249,10 +239,21 @@ cmdclass = {
     'develop': develop,
 }
 
+py_limited_api = sys.version_info[0] >= 3 and sys.version_info[1] >= 12
+if py_limited_api:
+    setup_opts = {
+        'bdist_wheel': {
+            'py_limited_api': 'cp312'
+        },
+    }
+else:
+    setup_opts = {}
+
 ext_modules = [
     setuptools.Extension(
         name=str('onnxsim.onnxsim_cpp2py_export'),
-        sources=[])
+        sources=[],
+        py_limited_api=py_limited_api)
 ]
 
 # no need to do fancy stuff so far
@@ -313,4 +314,5 @@ setuptools.setup(
             'onnxsim=onnxsim:main',
         ],
     },
+    options=setup_opts,
 )
