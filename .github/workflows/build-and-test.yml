@@ -11,8 +11,6 @@ on:
   workflow_dispatch:
 
 env:
-  # This is used to skip tests that are too heavy for CI
-  ONNXSIM_CI: 1
   # Package name - change this to switch between onnxsim and onnxsim-prebuilt
   ONNXSIM_PKG_NAME: onnxsim-prebuilt
 
@@ -22,7 +20,7 @@ jobs:
       CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
       CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
-      CIBW_ENVIRONMENT_PASS_LINUX: ONNXSIM_CI ONNXSIM_PKG_NAME SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2
+      CIBW_ENVIRONMENT_PASS_LINUX: CI ONNXSIM_PKG_NAME SCCACHE_GHA_ENABLED ACTIONS_RESULTS_URL ACTIONS_RUNTIME_TOKEN ACTIONS_CACHE_SERVICE_V2
       CIBW_BEFORE_BUILD: "python3 -m pip install --break-system-packages cmake ninja setuptools sccache"
       CIBW_TEST_REQUIRES: pytest flake8 onnxruntime onnxscript==0.2.3
       CIBW_BEFORE_TEST: pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu/
