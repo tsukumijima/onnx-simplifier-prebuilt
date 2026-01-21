@@ -91,12 +91,15 @@ jobs:
       uses: pypa/cibuildwheel@v3.3.1
       env:
         CIBW_BUILD: ${{ matrix.py_ver }}-*
-        CIBW_ARCHS_WINDOWS: ${{ contains(matrix.os, 'windows') && matrix.archs || 'AMD64' }}
-        CIBW_ARCHS_MACOS: ${{ contains(matrix.os, 'macos') && matrix.archs || 'x86_64' }}
-        CIBW_ARCHS_LINUX: ${{ contains(matrix.os, 'ubuntu') && matrix.archs || 'x86_64' }}
+        CIBW_ARCHS: ${{ matrix.archs }}
         CIBW_ENVIRONMENT: CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache
         CIBW_ENVIRONMENT_WINDOWS: USE_MSVC_STATIC_RUNTIME=0 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache ONNXSIM_PKG_NAME=${{ env.ONNXSIM_PKG_NAME }}
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15 CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=OFF -DProtobuf_USE_STATIC_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5" CMAKE_GENERATOR=Ninja CMAKE_CXX_COMPILER_LAUNCHER=sccache ONNXSIM_PKG_NAME=${{ env.ONNXSIM_PKG_NAME }}
+    - name: Check ABI3
+      run: |
+        pip install abi3audit
+        abi3audit --strict -v --report ./wheelhouse/*.whl
+      if: ${{ contains(fromJSON('["cp312"]'), matrix.py_ver) }}
     - uses: actions/upload-artifact@v4
       with:
         name: python-dist-${{ matrix.os }}-${{ matrix.archs }}-${{ matrix.py_ver }}
@@ -177,6 +180,11 @@ jobs:
     - name: Build sdist
       run: |
         export ONNXSIM_SDIST=ON
+        # Build onnx-simplifier alias metapackage sdist (for upstream only)
+        # pushd scripts/onnx-simplifier
+        # pipx run build --sdist
+        # mv dist ../..
+        # popd
         pipx run build --sdist
 
     - name: Install and test sdist
