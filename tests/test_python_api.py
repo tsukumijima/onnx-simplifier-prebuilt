@@ -24,6 +24,10 @@ def export_simplify_and_check_by_python_api(
         export_kwargs = {}
     if simplify_kwargs is None:
         simplify_kwargs = {}
+    # Use legacy TorchScript-based exporter (dynamo=False) for ScriptModule support
+    # PyTorch 2.9+ defaults to dynamo=True which doesn't support ScriptModule
+    if 'dynamo' not in export_kwargs:
+        export_kwargs['dynamo'] = False
     with tempfile.TemporaryDirectory() as tmpdirname:
         model_fn = os.path.join(tmpdirname, "tmp.onnx")
         torch.onnx.export(m, input, model_fn, **export_kwargs)
@@ -317,7 +321,7 @@ def test_perform_optimization_false():
         model = MockModel()
         dummy_input = torch.randn(1, 10)
         onnx_file = "dummy_model.onnx"
-        torch.onnx.export(model, dummy_input, onnx_file)
+        torch.onnx.export(model, dummy_input, onnx_file, dynamo=False)
         return onnx_file
 
     onnx_model_path = _create_dummy_model()
