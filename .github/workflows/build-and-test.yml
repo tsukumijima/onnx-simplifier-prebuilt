@@ -153,12 +153,14 @@ jobs:
         python-version: ${{ matrix.py_ver }}
         allow-prereleases: true
     - name: Test ABI3 wheel on Python ${{ matrix.py_ver }}
+      shell: bash
       run: |
         pip install -r requirements.txt
-        pip install pytest torch==2.10.0 torchvision==0.25.0 --index-url https://download.pytorch.org/whl/cpu/
+        pip install pytest torch==2.10.0 torchvision==0.25.0 --extra-index-url https://download.pytorch.org/whl/cpu/
         pip install ./wheelhouse/*.whl
         pytest -v tests/test_python_api.py
-        python -m onnxsim -h
+        # Run onnxsim from a different directory to avoid local onnxsim/ shadowing the installed wheel
+        cd /tmp && python -m onnxsim -h
 
   build_sdist:
     name: Build source distribution
