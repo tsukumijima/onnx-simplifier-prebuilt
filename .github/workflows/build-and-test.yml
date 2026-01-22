@@ -154,8 +154,8 @@ jobs:
         allow-prereleases: true
     - name: Test ABI3 wheel on Python ${{ matrix.py_ver }}
       run: |
-        pip install pytest onnxruntime
-        pip install torch==2.10.0 torchvision==0.25.0 --index-url https://download.pytorch.org/whl/cpu/
+        pip install -r requirements.txt
+        pip install pytest torch==2.10.0 torchvision==0.25.0 --index-url https://download.pytorch.org/whl/cpu/
         pip install ./wheelhouse/*.whl
         pytest -v tests/test_python_api.py
         python -m onnxsim -h
