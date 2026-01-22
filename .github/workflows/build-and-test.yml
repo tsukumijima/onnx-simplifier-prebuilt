@@ -11,8 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  # Package name - change this to switch between onnxsim and onnxsim-prebuilt
-  ONNXSIM_PKG_NAME: onnxsim-prebuilt
+  ONNXSIM_PKG_NAME: onnxsim
 
 jobs:
   build_wheels:
@@ -184,10 +183,10 @@ jobs:
       run: |
         export ONNXSIM_SDIST=ON
         # Build onnx-simplifier alias metapackage sdist (for upstream only)
-        # pushd scripts/onnx-simplifier
-        # pipx run build --sdist
-        # mv dist ../..
-        # popd
+        pushd scripts/onnx-simplifier
+        pipx run build --sdist
+        mv dist ../..
+        popd
         pipx run build --sdist
 
     - name: Install and test sdist
