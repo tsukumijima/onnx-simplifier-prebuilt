@@ -127,19 +127,19 @@ jobs:
           - os: ubuntu-24.04-arm
             archs: aarch64
             py_ver: "3.13"
-          # Python 3.14
-          - os: windows-2025
-            archs: AMD64
-            py_ver: "3.14"
-          - os: macos-15
-            archs: universal2
-            py_ver: "3.14"
-          - os: ubuntu-24.04
-            archs: x86_64
-            py_ver: "3.14"
-          - os: ubuntu-24.04-arm
-            archs: aarch64
-            py_ver: "3.14"
+          # Python 3.14 (onnxruntime does not support Python 3.14 yet)
+          # - os: windows-2025
+          #   archs: AMD64
+          #   py_ver: "3.14"
+          # - os: macos-15
+          #   archs: universal2
+          #   py_ver: "3.14"
+          # - os: ubuntu-24.04
+          #   archs: x86_64
+          #   py_ver: "3.14"
+          # - os: ubuntu-24.04-arm
+          #   archs: aarch64
+          #   py_ver: "3.14"
     steps:
     - uses: actions/checkout@v4
     - name: Download cp312 ABI3 wheel
