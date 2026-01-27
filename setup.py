@@ -289,7 +289,7 @@ setuptools.setup(
     setup_requires=setup_requires,
     author='ONNX Simplifier Authors',
     author_email='daquexian566@gmail.com',
-    url='https://github.com/daquexian/onnx-simplifier',
+    url='https://github.com/tsukumijima/onnx-simplifier-prebuilt',
     keywords='deep-learning ONNX',
     long_description=long_description,
     long_description_content_type='text/markdown',
