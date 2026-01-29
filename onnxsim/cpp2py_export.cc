@@ -102,6 +102,12 @@ NB_MODULE(onnxsim_cpp2py_export, m) {
              ModelExecutor::set_instance(std::move(executor));
            });
 
+  // Release the C++ static reference to the Python model executor
+  // This is called via atexit to prevent nanobind's "leaked instances" warning
+  m.def("_clear_model_executor", []() {
+    ModelExecutor::set_instance(nullptr);
+  });
+
   py::class_<PyModelExecutor, PyModelExecutorTrampoline>(m, "ModelExecutor")
       .def(py::init<>())
       .def("Run", &PyModelExecutor::_PyRun);
